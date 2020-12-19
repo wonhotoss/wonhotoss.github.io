@@ -17,6 +17,8 @@ dot notation을 사용하면 또 정상동작하는( ng-model='wrapper.value' ) 
 wrapper객체 자체는 언제나 읽기만 일어나므로, shadowing이 일어나지 않기 때문.
 ng-model='$parent.value'로 접근할 수 있지만, ng-if를 빼면 $parent도 빼줘야 하므로 차라리 wrapper가 낫다.
 
+
+
 <img src="https://docs.google.com/drawings/d/e/2PACX-1vSO755xFBA0ZEaU5kW0IeU67DrzUsBbhWGKy3sS2Ah4ecDh630R4cfbmv0yVkXJlJzLKEXbeY-zV3He/pub?w=1089&h=1263">
 
 
