@@ -1,3 +1,8 @@
+---
+layout: post
+title: "jekyll과 github과 github page"
+---
+
 <img src="https://docs.google.com/drawings/d/e/2PACX-1vRKioDaDWK5z53ARwSD0YG0MZ8IfD6M8TXGgBN1VLfFfPhTWX1DgaG8X-1OWsabMtCNkumDFiQdgjL8/pub?w=1440&amp;h=1080">
 
 - jekyll은 구조화된 일련의 데이터를 정적 싸이트로 빌드하는 툴. 정적 싸이트라고 하지만 뭐든 될 것 같진 않고 일단 블로그 지향적. 포스트, 컨피그, 테마 등등을 편집한 후 빌드하면 각각의 포스트 페이지들과 인덱스 페이지 문서를 맹글어준다. 이 문서들을(_sites) 어디엔가 올려서 호스팅하면 블로그 완성.

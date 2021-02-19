@@ -1,3 +1,8 @@
+---
+layout: post
+title: "angularJS2 ng-if로 망하는 법"
+---
+
 - javascript객체는 prototypical inheritance를 할 수 있다. 
 객체 Derived가 다른 객체 Proto를 prototype으로 가질 때, Derived가 갖지 않은 property read는 Proto로 포워딩된다.
 하지만 property write가 일어나면 Derived는 직접 값을 저장하고, 이 시점부터 Proto의 property를 shadowing한다.
