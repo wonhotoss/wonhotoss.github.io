@@ -1,6 +1,9 @@
 ---
 layout: post
 title: "vscode의 타입 정의 추적"
+tags: 
+    - typescript 
+    - vscode
 ---
 
 let t = {

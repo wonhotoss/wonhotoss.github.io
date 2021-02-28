@@ -1,0 +1,12 @@
+{% for tag in include.content %}
+    <!-- TODO: permalink from tagname -->
+    <a href='/tags/{{tag}}'>{{ tag }}</a>
+{% endfor %}
+
+{% for tag in site.tags %}
+  <h2>
+    {{ tag.url}}
+  </h2>
+{% endfor %}
+
+{{site.tags["typescript"].url}}
