@@ -1,6 +1,9 @@
 ---
 layout: post
 title: "angularJS2 ng-if로 망하는 법"
+tags: 
+    - javascript 
+    - AngularJS
 ---
 
 - javascript객체는 prototypical inheritance를 할 수 있다. 

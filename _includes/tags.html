@@ -1,12 +1,13 @@
-{% for tag in include.content %}
-    <!-- TODO: permalink from tagname -->
-    <a href='/tags/{{tag}}'>{{ tag }}</a>
-{% endfor %}
+{% if include.content.size > 0 %}
+    &nbsp;
+    {% assign first = site.tags | where: "name", include.content[0] | first %}
+    <a href='{{first.url}}'>{{ include.content[0] }}</a>
 
-{% for tag in site.tags %}
-  <h2>
-    {{ tag.url}}
-  </h2>
-{% endfor %}
-
-{{site.tags["typescript"].url}}
+    {% assign fromsecond = include.content | slice: 1, include.content.size - 1 %}
+    {% for tag in fromsecond %}
+        <!-- TODO: filter and dot? -->
+        ,&nbsp;
+        {% assign matched = site.tags | where: "name", tag | first %}
+        <a href='{{matched.url}}'>{{ tag }}</a>
+    {% endfor %}
+{%- endif -%}

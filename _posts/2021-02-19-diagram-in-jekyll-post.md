@@ -1,6 +1,9 @@
 ---
 layout: post
 title: "jekyll 포스트에 다이어그램 삽입하기"
+tags: 
+    - jekyll 
+    - mermaid
 ---
 
 {% include mermaidInPost.html %}
