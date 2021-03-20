@@ -18,7 +18,6 @@ let arm = makebody({
     }
 });
 arm.hand.bone.rotate();
-arm.hand.finger.nail.color = color.red;
 arm.hand = {};  // error
 /*
 arm : {
@@ -80,7 +79,7 @@ decorated.prop은 원본과 다르게 readonly. 접근 제한자를 붙이더라
 
 {% highlight ts %}
 function makeNumber<T>(src: T){
-    return src as unknown as {[K in keyof T]: number};
+    return src as any as {[K in keyof T]: number};
 }
 let decorated = makeNumber({prop: '1'});
 decorated.prop;
@@ -88,22 +87,62 @@ decorated.prop;
 타입을 바꿔줘도 쫓아간다. mapped type은 그냥 쫓아가는 듯.
 
 {% highlight ts %}
-function makeNumber<T>(src: T){
+function addTrait<T>(src: T){
     type recursiveDecorate<T> = {[K in keyof T]: recursiveDecorate<T[K]>} & {trait?: number};
     return src as recursiveDecorate<T>;
 }
-let decorated = makeNumber({
+let traited = addTrait({
     shell0: {
         shell1: {
             prop: 1,
         }
     }
 });
-decorated.shell0.trait;
-decorated.shell0.shell1.trait;
-decorated.shell0.shell1.prop;
+traited.shell0.trait;
+traited.shell0.shell1.trait;
+traited.shell0.shell1.prop;
 {% endhighlight %}
-재귀 타이핑. 역시 쫓아간다.
+재귀 타이핑. 역시 쫓아간다. 이쯤 되면 되는 게 당연하고 내 코드에 뭔가 문제가 있음이 확실해졌다.
+
+{% highlight ts %}
+type numberKeys<T> = { [K in keyof T]: T[K] extends number ? K : never }[keyof T];
+type notnumberKeys<T> = { [K in keyof T]: T[K] extends number ? never : K }[keyof T];
+type readonlyNumbers<T> = {readonly [P in numberKeys<T>]: number} & {[P in notnumberKeys<T>]: T[P]}
+function makeReadonlyNumbers<T>(src: T){
+    return src as any as readonlyNumbers<T>;
+}
+
+let restricted = makeReadonlyNumbers({
+    n: 1,
+    s: 'a',
+});
+restricted.n;
+restricted.s;
+restricted.n = 2;   // error. n is readonly
+{% endhighlight %}
+드디어 찾았다. 위의 `restricted.n`과 `restricted.s` 는 정의를 찾아가지 못한다. 위의 코드는 타입의 프로퍼티 중 조건에 맞는 일부에만 접근 제한자를 붙이기 위해 만들어졌다(number 에만 readonly). 실제 위와 똑같은 코드가 프로젝트에서도 사용중이었고 문제의 원인이었다. 위의 코드를 타입스크립트가 제공하는 유틸리티 타입을 사용하도록 바꿔보자.
+
+{% highlight ts %}
+type readonlyNumbers<T> = Readonly<Pick<T, numberKeys<T>>> & Pick<T, notnumberKeys<T>>
+{% endhighlight %}
+이제 잘 찾아간다. 문제는 해결되었지만, 유틸리티 타입을 찾아가서 문제의 원인을 좀 더 파헤쳐보자. 일단 경우를 좁히기 위해 intersection type과 `Readonly` 관련은 빼고 `Pick`부터 살펴보자.
+
+{% highlight ts %}
+type numberKeys<T> = { [K in keyof T]: T[K] extends number ? K : never }[keyof T];
+type numbers1<T> = {[P in numberKeys<T>]: T[P]}
+type numbers2<T> = Pick<T, numberKeys<T>>
+let signature = {n: 1};
+let typed1 = signature as numbers1<typeof signature>;
+let typed2 = signature as numbers2<typeof signature>;
+typed1.n = 2;
+typed2.n = 2;
+{% endhighlight %}
+위의 `typed2.n` 만이 `signature.n` 을 찾아간다. 와 `Pick`를 찾아와서 inlining해보자.
+
+{% highlight ts %}
+type Pick<T, K extends keyof T> = {[P in K]: T[P];};
+{% endhighlight %}
+이상하다. `Pick`의 내용은 위의 numbers1에 이미 inlining되어 있다. 혹시 vscode가 제공된 유틸리티 타입에 대해서만 특별한 처리를 하는 건가 했지만 그렇진 않다(내용을 복사해서 Pick2를 만들어도 같은 결과).
 
 
 재귀 제네릭(인터섹션 + 접근 제한자) 왜 나는 안돼는거야?
