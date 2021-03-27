@@ -120,54 +120,17 @@ restricted.n;
 restricted.s;
 restricted.n = 2;   // error. n is readonly
 {% endhighlight %}
-드디어 찾았다. 위의 `restricted.n`과 `restricted.s` 는 정의를 찾아가지 못한다. 위의 코드는 타입의 프로퍼티 중 조건에 맞는 일부에만 접근 제한자를 붙이기 위해 만들어졌다(number 에만 readonly). 실제 위와 똑같은 코드가 프로젝트에서도 사용중이었고 문제의 원인이었다. 위의 코드를 타입스크립트가 제공하는 유틸리티 타입을 사용하도록 바꿔보자.
+드디어 찾았다. 위의 `restricted.n`과 `restricted.s` 는 정의를 찾아가지 못한다. 위의 코드는 타입의 프로퍼티 중 조건에 맞는 일부에만 접근 제한자를 붙이기 위해 만들어졌다(number 에만 readonly). 실제 위와 똑같은 코드가 프로젝트에서도 사용중이었고 문제의 원인이었다. 좀 더 간단하게 바꿔보자.
 
 {% highlight ts %}
-type readonlyNumbers<T> = Readonly<Pick<T, numberKeys<T>>> & Pick<T, notnumberKeys<T>>
+type numberKeys<T> = {[K in keyof T]: T[K] extends number ? K : never}[keyof T];
+type numbers<T> = {[P in numberKeys<T>]: T[P]};
+let typed: numbers<{prop: number, noprop: string}>;
+typed.prop;
 {% endhighlight %}
-이제 잘 찾아간다. 문제는 해결되었지만, 유틸리티 타입을 찾아가서 문제의 원인을 좀 더 파헤쳐보자. 일단 경우를 좁히기 위해 intersection type과 `Readonly` 관련은 빼고 `Pick`부터 살펴보자.
+위의 코드는 prop의 선언을 찾아가지 못한다. 
 
 {% highlight ts %}
-type numberKeys<T> = { [K in keyof T]: T[K] extends number ? K : never }[keyof T];
-type numbers1<T> = {[P in numberKeys<T>]: T[P]}
-type numbers2<T> = Pick<T, numberKeys<T>>
-let signature = {n: 1};
-let typed1 = signature as numbers1<typeof signature>;
-let typed2 = signature as numbers2<typeof signature>;
-typed1.n = 2;
-typed2.n = 2;
+type numbers<T> = Pick<T, numberKeys<T>>;
 {% endhighlight %}
-위의 `typed2.n` 만이 `signature.n` 을 찾아간다. 와 `Pick`를 찾아와서 inlining해보자.
-
-{% highlight ts %}
-type Pick<T, K extends keyof T> = {[P in K]: T[P];};
-{% endhighlight %}
-이상하다. `Pick`의 내용은 위의 numbers1에 이미 inlining되어 있다. 혹시 vscode가 제공된 유틸리티 타입에 대해서만 특별한 처리를 하는 건가 했지만 그렇진 않다(내용을 복사해서 Pick2를 만들어도 같은 결과).
-
-
-재귀 제네릭(인터섹션 + 접근 제한자) 왜 나는 안돼는거야?
-
-mapped type
-
-
-
-
-function addc<T>(src: T){
-    return Object.assign(t, {c: 3});
-}
-
-// type TT<T> = treeBranch<T>;
-// type TT<T> = {readonly [P in keyof T]: string} & {c: number};
-type stringKeys<T> = { [K in keyof T]: T[K] extends string ? K : never }[keyof T];
-type tonumber<T> = {[K in keyof T]: number};
-// type TT<T> = {readonly [P in stringKeys<T>]: T[P]} & {c: number};
-type TT<T> = Readonly<tonumber<Pick<T, stringKeys<T>>>> & {c: number};
-function addc2<T>(src: T): TT<T>{
-    return null as TT<T>;
-}
-
-let k = addc(t);
-let k2 = addc2(t);
-
-k.aaa = 2;
-let j = k2.b;
+유틸리티 타입 `Pick`을 이용해서 선언을 찾아가게 만들 수 있다. 내용을 복사해서 다른 이름으로 바꿔도 결과가 동일한 걸 보면 내장 타입에 대해 특별한 처리가 되어 있는 것 같진 않다. 단 Pick의 내용을 직접 inlining하면 또 쫓아가지 못한다.( `Pick`의 내용은 사실 위의 `numbers`와 별 차이가 없다.)
