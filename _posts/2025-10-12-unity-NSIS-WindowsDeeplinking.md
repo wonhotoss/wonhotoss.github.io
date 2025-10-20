@@ -14,8 +14,8 @@ My Troubleshooting record from company project.
 
 - Product stack
     - Unity3D + Windows standalone build
-    - NSIS Portable https://portableapps.com/apps/development/nsis_portable
-    - Windows Deep Linking https://assetstore.unity.com/packages/tools/integration/deep-linking-for-windows-standalone-exe-264033
+    - [NSIS Portable](https://portableapps.com/apps/development/nsis_portable)
+    - [Windows Deep Linking](https://assetstore.unity.com/packages/tools/integration/deep-linking-for-windows-standalone-exe-264033)
 
 - Why we use `deep linking`
     - Our app needs users to log in with IDPW or SSO, includes Google login. AFAIK, Google login must be performed on a Google domain, like google.com or their native app. Their SDK is just a way to reach the site. And the only site we can reach to in Widows is google.com. So we build our own login web page, conduct every SSO process on it, and send back access token to our app for further requests.
@@ -53,21 +53,21 @@ My Troubleshooting record from company project.
 
 - Problem
 
-    <img src="../assets/images/another-instance-is-already-running.png"/>
+    ![running](/assets/images/another-instance-is-already-running.png)
 
     - when my app completes the login and tries to send the access token back, the OS opens a new app instance, instead of focus the one already exists. Since we enabled `force single instance`, it drops error dialog and quit. Thanks to `WDL`, original app instance reads stored query params when it gets focus manually. But we want to everything looks fine without any error.
 
-    <img src="../assets/images/force-single-instance.png"/>
+    ![single](/assets/images/force-single-instance.png)    
 
     - We use NSIS to make instaer package. This case happens only on the execution from `Run my app` button in the last dialog of installer.
 
-    <img src="../assets/images/run-after-installation.png"/>
+    ![installation](/assets/images/run-after-installation.png)
 
 <br>
 <br>
 
 - reason
-    - permission issue. <a href="https://chatgpt.com/share/68ea9304-9860-800b-886e-5a1dba6d7d32">ChatGPT</a>
+    - permission issue. [ChatGPT](https://chatgpt.com/share/68ea9304-9860-800b-886e-5a1dba6d7d32)
     - Our installer requires admin permission since it installs firewall exception. Conseqently, the app process launched by installer inherits admin permission from installer.
     - Our app opens login page using UnityEngine.ApplicationOpenURL and starts WDL process. It installs temporary script and waits for custom URI invoked as mentioned above. But both opening Web browser and invoking custom URI are conducted by the OS, we lose admin permission during the process. The temporary script is excuted with user permission.
     - The temporary script queries ongoing process with given name, but it fails to find app process under admin permission. It spawns new process instead activating existing one.
@@ -76,7 +76,7 @@ My Troubleshooting record from company project.
 <br>
 
 - solution
-    - Launch app with user permission. Thanks to <a href="https://nsis.sourceforge.io/ShellExecAsUser_plug-in">ShallExecAsUser</a>
+    - Launch app with user permission. Thanks to [ShallExecAsUser](https://nsis.sourceforge.io/ShellExecAsUser_plug-in)
 
 <br>
 <br>
