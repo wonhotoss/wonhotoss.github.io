@@ -12,6 +12,42 @@ Illustrating How Shopify theme and it`s dev environment works.
 
 For the sake of simplicity, We will make world-class simple theme, "Hello Shopify theme".
 
+create smallest theme
+
+CLI, push, pull, what is static and what is dynamic, and how it is rendered
+
+what is template(idnex.json)
+
+add section
+    what is a section?
+    create section file
+    add dynamic section to template via online editor
+    check from online editor
+    add static section to template via index.json
+    check from online editor
+    check addible and removable of static / dynamic sections
+
+    add section settings and apply when rendering
+
+add blocks
+    what is a block?
+    add block and render with CSS in assets
+
+add snippets
+    use snippet on duplicates
+    if error cones out, try restart dev env. `Liquid error (sections/section-dynamic line 12): Could not find asset snippets/info-panel.liquid`
+
+
+
+    
+    
+
+    
+
+
+
+---------------
+
 {% include mermaidInPost.html %}
 <script src="../assets/scripts/mermaid.min.js"></script>
 
