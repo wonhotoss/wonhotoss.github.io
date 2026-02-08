@@ -8,7 +8,72 @@ tags:
     - CSS
 ---
 
-Illustrating How Shopify theme and it`s dev environment works.
+{% include mermaidInPost.html %}
+<script src="../assets/scripts/mermaid.min.js"></script>
+
+We will walkthrough How Shopify theme and it`s dev environment works. We can understand shopify theme as a kind of site generator, with rich featured editor and contents store. If you came from game industry, you will discover common points between this and game engines like unity and unreal. Lets start with install [Shopify CLI](https://shopify.dev/docs/api/shopify-cli).
+
+Now you can start by making directory and type `shopify theme init`. It will prompt you to login to shopify and make a store, and make a structure for theme.
+
+![result of `shopify theme init`](/assets/images/shopify-theme-init.png)
+
+IMAO, this is too much for beginner. We introduce the smallest theme For the sake of simplicity. It has only 4 files. Paste below files in your theme directory.
+
+/config/settings.json
+```json
+[
+  {
+    "name": "Theme settings",
+    "settings": [
+        {
+            "type": "checkbox",
+            "id": "dummy_setting",
+            "label": "Dummy setting",
+            "default": false
+        }
+    ]
+  }
+]
+```
+
+/layout/theme.liquid
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    {{ content_for_header }}
+  </head>
+  <body>
+    {{ content_for_layout }}
+  </body>
+</html>
+```
+
+/sections/main.liquid
+```html
+<h1>Hello, Shopify Theme 👋</h1>
+<p>This is the smallest possible theme.</p>
+```
+
+/templates/index.json
+```json
+{
+  "sections": {
+    "main": {
+      "type": "main"
+    }
+  },
+  "order": ["main"]
+}
+```
+
+Open your directory in the VSCODE, install Shopify liquid extension, add .gitignore(you can find it out), and start dev by typing `shopify theme dev` at your working directory. You can see preview as below.
+
+![http://localhost:9292](/assets/images/hello-shopify-theme.png)
+
+
+
+ or game scene in the game engine(like unity3D). 
 
 For the sake of simplicity, We will make world-class simple theme, "Hello Shopify theme".
 
@@ -27,6 +92,7 @@ add section
     what is a section?
     create section file
     add dynamic section to template via online editor
+        schema - presets makes section dynamic
     check from online editor
     add static section to template via index.json
     check from online editor
@@ -54,8 +120,7 @@ add snippets
 
 ---------------
 
-{% include mermaidInPost.html %}
-<script src="../assets/scripts/mermaid.min.js"></script>
+
 
 My Troubleshooting record from company project. 
 
