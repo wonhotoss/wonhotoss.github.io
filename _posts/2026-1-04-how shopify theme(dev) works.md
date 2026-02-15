@@ -71,6 +71,85 @@ Open your directory in the VSCODE, install Shopify liquid extension, add .gitign
 
 ![http://localhost:9292](/assets/images/hello-shopify-theme.png)
 
+Let's look int these files. 
+`/config/settings.json` : Settings for your theme. At least one settings is required, so we fill in dummy one.
+`/layout/theme.liquid` : Actual template. HTML page with template tags waiting to be filled in. `content_for_header` and `content_for_layout` are reserved words.
+`/sections/main.liquid` : Looks like DOM component. We can see this piece is placed in the Body of theme.liquid in preview.
+`/templates/index.json` : Looks like a kind of metadata.
+
+Before check the online editor, we need to push our theme in out store. Our theme is just a organised directory enough to preview, but Shopify itself doens't know our new theme. `shopify theme push` in your theme directory. It may prompt you to login, authenticate, select store if it is required. Anbd after all, It will prompt to choose select one of existing theme or create new one. I recommend create new one has explicit name.
+
+![pushing theme](/assets/images/push-theme.png)
+
+Then let's go to the online theme editor. We will see how the thing above work actually. Go to `Online store` of your shopify admin page.
+
+![online editor](/assets/images/hello-shopify-theme-online.png)
+
+We see section `Main` is already placed and preview panel right is showing how it woll be rendered. `Add section` button is at down there, but it will show nothing to add. Let's add something to add. Return to the project, and add a file below.
+
+/sections/section.liquid
+```html
+<h1>This is a section.</h1>
+
+{% schema %}
+{
+    "name": "section",
+    "tag": "section",
+    "class": "section",    
+    "presets": [
+        {
+            "name": "section-instance",
+            "blocks": [                        
+            ]
+        }
+    ]
+}
+{% endschema %}
+```
+
+We can`t see any of difference on preview yet. Push our theme again, and let's revisit online editor. You may need refresh.
+
+![new dynamic section](/assets/images/new-section.png)
+
+Now we can see `section-instance` in `add-section` popup. Try add, remove(bin button), and add again. Now we know how declare dynamic section, but you may wonder why out first section `main` is not dynamic. Before proceed, save editing theme, with section added, and return to CLI. Type `shopify theme pull` to pull editing theme to local.
+
+/templates/index.json
+```json
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main",
+      "settings": {}
+    },
+    "section_3CdGKr": {
+      "type": "section",
+      "name": "section-instance",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main",
+    "section_3CdGKr"
+  ]
+}
+
+```
+
+Comments saying machine generated is ahead, and section_{hash} object is added. Preview at 9292 should show same page with online preview. We can figure out this file is the state saved in the online editor, and it contains sections and its order. And section file we provided is a entity definition used in online editor.
+
+If we remove `presets` object from section schema, we will not be able to add or remove this section from template. This is why `main` section is static here. We omit testing this.
+
+Let`s try blocks and snippets.
+
 
 
  or game scene in the game engine(like unity3D). 
