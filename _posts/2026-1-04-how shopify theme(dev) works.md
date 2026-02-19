@@ -144,142 +144,155 @@ Now we can see `section-instance` in `add-section` popup. Try add, remove(bin bu
 
 ```
 
-Comments saying machine generated is ahead, and section_{hash} object is added. Preview at 9292 should show same page with online preview. We can figure out this file is the state saved in the online editor, and it contains sections and its order. And section file we provided is a entity definition used in online editor.
+Comments saying machine generated is ahead, and section_{hash} object is added. Preview at 9292 should show same page with online preview. We can figure out this file is the state saved in the online editor, and it contains sections and its order. And section file we provided is a entity definition used in online editor. If we remove `presets` object from section schema, we will not be able to add or remove this section from template. This is why `main` section is static here. We omit testing this.
 
-If we remove `presets` object from section schema, we will not be able to add or remove this section from template. This is why `main` section is static here. We omit testing this.
+During above steps, We walked through principle workflow of site generation.
 
-Let`s try blocks and snippets.
+- make empty template locally.
+- upload template and preview.
+- make editable entity.
+- upload entity and edit template actually using the entity we made.
+- pull back edited template.
 
+This is the way. There are much more options and configurations, but we have to do actually is making components, upload, edit with components, repeat several times, and publish. 
+Many of components require dynamic fill-in contents, like product information, and they can be queried only in online editor. So it's hard to accomplish test our components all the way along locally. That's why we have to upload theme and pull back.
 
+Using above steps, let's test out `block`, `snippet`, `asset`. Paste files below. Maybe `snippets` and `assets` directories should be made.
 
- or game scene in the game engine(like unity3D). 
+/sections/section.liquid
+```html
+{{ 'info-panel.css' | asset_url | stylesheet_tag }}
 
-For the sake of simplicity, We will make world-class simple theme, "Hello Shopify theme".
+<h1>This is a section.</h1>
 
-env
-    - dev store
-    - vs code
-    - shopify cli
-
-create smallest theme    
-
-CLI, push, pull, what is static and what is dynamic, and how it is rendered
-
-what is template(idnex.json)
-
-add section
-    what is a section?
-    create section file
-    add dynamic section to template via online editor
-        schema - presets makes section dynamic
-    check from online editor
-    add static section to template via index.json
-    check from online editor
-    check addible and removable of static / dynamic sections
-
-    add section settings and apply when rendering
-
-add blocks
-    what is a block?
-    add block and render with CSS in assets
-
-add snippets
-    what is a snippet?
-    use snippet on duplicates
-    if error cones out, try restart dev env. `Liquid error (sections/section-dynamic line 12): Could not find asset snippets/info-panel.liquid`
+{%- for block in section.blocks -%}
+    {%- case block.type -%}
+        {%- when 'info-panel' -%}
+            {% render 'info-panel', block: block %}
+    {%- endcase -%}
+{%- endfor -%}    
 
 
+{% schema %}
+{
+    "name": "section",
+    "tag": "section",
+    "class": "section",    
+    "blocks": [
+        {
+            "type": "info-panel",
+            "name": "info panel",      
+            "settings": [
+                {
+                    "type": "richtext",
+                    "id": "info",
+                    "label": "text content"
+                }
+            ]
+        }                                
+    ],
+    "presets": [
+        {
+            "name": "section-instance",
+            
+        }
+    ]
+}
+{% endschema %}
+```
 
-    
-    
+/snippets/info-panel.liquid
+```html
+<div class="info-panel">
+    {{ block.settings.info }}  	
+</div>
+```
 
-    
+/assets/info-panel.css
+```css
+.info-panel {
+	background: rgba(200, 200, 200, 1);	
+}
+```
+
+And push your theme again. Now we can add info-panel under our new section, and modify it's info text.
+
+![text content](/assets/images/text-content.png)
+
+Furthermore We see snippet file is rendered in section, and CSS in assets are loaded with section. If we want to give a kind of behavior, you can place JS in assets and bind them with DOM element rendered. Let's pull back out theme. 
+
+/templates/index.json
+```json
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main",
+      "settings": {}
+    },
+    "section_3CdGKr": {
+      "type": "section",
+      "blocks": {
+        "info_panel_bUdBqX": {
+          "type": "info-panel",
+          "settings": {
+            "info": "<p>123123123</p>"
+          }
+        }
+      },
+      "block_order": [
+        "info_panel_bUdBqX"
+      ],
+      "name": "section-instance",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main",
+    "section_3CdGKr"
+  ]
+}
 
 
+```
 
----------------
-
-
-
-My Troubleshooting record from company project. 
-
-- Product stack
-    - Unity3D + Windows standalone build
-    - [NSIS Portable](https://portableapps.com/apps/development/nsis_portable)
-    - [Windows Deep Linking](https://assetstore.unity.com/packages/tools/integration/deep-linking-for-windows-standalone-exe-264033)
-
-- Why we use `deep linking`
-    - Our app needs users to log in with IDPW or SSO, includes Google login. AFAIK, Google login must be performed on a Google domain, like google.com or their native app. Their SDK is just a way to reach the site. And the only site we can reach to in Widows is google.com. So we build our own login web page, conduct every SSO process on it, and send back access token to our app for further requests.
+We see block instance `info_panel_bUdBqX` is placed. Now we can see edited theme in local preview  same as online editor. 
 
 <div class="mermaid">
-    sequenceDiagram
-    app->>+web browser: open login page
-    web browser->>+server: login(IDPW or SSO token)
-    server->>+web browser: access token
-    web browser->>+app: deep link with access token
-    app->>+server: authorized access with access token
+    ---
+        config:
+            class:
+                hideEmptyMembersBox: true
+    ---
+    classDiagram    
+    theme --> preview : shopify theme dev
+    theme --> online : shopify theme push
+    theme <-- online : shopify theme pull
+    online --> production : publish
+    class theme{
+        /assets - JS, CSS, or else
+        /layout - HTML
+        /sections - partial DOM. can have blocks
+        /snippets- re-usable DOM
+        /templates - my site actually configured using aboves 
+    }
+    class local_preview{        
+        http://localhost:9292
+    }
+    class online_editor{
+        https://admin.shopify.com/store/.../themes/.../editor
+    }
+    class production{
+        https://mydomain.shopify.com
+    }
 </div>
 
-<br>
-<br>
-
-
-- Why Unity doens`t support deep linking on Windows(Why we use Windows Deep Linking package)
-    - `Deep Linking` is a way to send data app-to-app, so it must be hosted by OS itself like a service, since it should wake up target app if inactive.
-    - A Unity standalone Windows build is basically portable — it isn’t an installed application, so it can’t register itself with the OS. It`s different from Android or IOS build, including manifest and Installation process. OS never know where the app is and how to call it. 
-    - So we use `Windows Deep Linking` package from the Asset store.
-
-<br>
-<br>
-
-- How the package(Windows deep linking, `WDL` below) works
-    1. Deep linking needs `CustomURI` entry in the registry. Normally this entry stores the keyword and app executable path. and the OS call the app when deep link requested with the keyword.This is the standard way deep linking works. 
-    2. When our app uses `WDL`, it stores CustomURI on the fly, but it stores temporary script and the path of the script is stored in CustomURI entry instead on app path. the script is excuted once the CustomURI invoked.
-    3. The script contains our app path. And it accepts Deep link queries(parametets?) from OS when excuted. The script stores queries somewhere, and call our app.
-    4. Our app gets focus by the script. It reads parameters from promised place. Deep linking is accomplished.
-    5. Since the polling way above, WDL can simulate deep llinking even in Unity editor.
-
-<br>
-<br>
-
-- Problem
-
-    ![running](/assets/images/another-instance-is-already-running.png)
-
-    - when my app completes the login and tries to send the access token back, the OS opens a new app instance, instead of focus the one already exists. Since we enabled `force single instance`, it drops error dialog and quit. Thanks to `WDL`, original app instance reads stored query params when it gets focus manually. But we want to everything looks fine without any error.
-
-    ![single](/assets/images/force-single-instance.png)    
-
-    - We use NSIS to make instaer package. This case happens only on the execution from `Run my app` button in the last dialog of installer.
-
-    ![installation](/assets/images/run-after-installation.png)
-
-<br>
-<br>
-
-- reason
-    - permission issue. [ChatGPT](https://chatgpt.com/share/68ea9304-9860-800b-886e-5a1dba6d7d32)
-    - Our installer requires admin permission since it installs firewall exception. Conseqently, the app process launched by installer inherits admin permission from installer.
-    - Our app opens login page using UnityEngine.ApplicationOpenURL and starts WDL process. It installs temporary script and waits for custom URI invoked as mentioned above. But both opening Web browser and invoking custom URI are conducted by the OS, we lose admin permission during the process. The temporary script is excuted with user permission.
-    - The temporary script queries ongoing process with given name, but it fails to find app process under admin permission. It spawns new process instead activating existing one.
-
-<br>
-<br>
-
-- solution
-    - Launch app with user permission. Thanks to [ShallExecAsUser](https://nsis.sourceforge.io/ShellExecAsUser_plug-in)
-
-<br>
-<br>
-
-- rejected alternatives
-    - User-level installer
-        - Anyway we need admin permission because we need firewall exceptions.
-    - Multiple instance + Manual process query and focus
-        - If another process instance exist, yield focus and quit. But it will suffer the same problem as the script.    
-    - Use customURI as usual way(calling app), instead of calling script querying process
-        - We need two customURI - one for script to store info, another one for wake up process, since Unity doesnt pass pass query parameters. Too complex.
-    - Fixing temporary script
-        - Use process ID, not appPath, to avoid process query.
-            - It sounds like it might work(not tested). But we will need multiple instances and manual process someday, So it would be good to fix permission issue here.
-        
+I`ve wrap up how shopify theme works between online editor and local CLI. Enjoy!!
