@@ -89,6 +89,7 @@ We see section `Main` is already placed and preview panel right is showing how i
 
 /sections/section.liquid
 ```html
+{% raw %}
 <h1>This is a section.</h1>
 
 {% schema %}
@@ -105,6 +106,7 @@ We see section `Main` is already placed and preview panel right is showing how i
     ]
 }
 {% endschema %}
+{% endraw %}
 ```
 
 We can`t see any of difference on preview yet. Push our theme again, and let's revisit online editor. You may need refresh.
@@ -161,6 +163,7 @@ Using above steps, let's test out `block`, `snippet`, `asset`. Paste files below
 
 /sections/section.liquid
 ```html
+{% raw %}
 {{ 'info-panel.css' | asset_url | stylesheet_tag }}
 
 <h1>This is a section.</h1>
@@ -199,6 +202,7 @@ Using above steps, let's test out `block`, `snippet`, `asset`. Paste files below
     ]
 }
 {% endschema %}
+{% endraw %}
 ```
 
 /snippets/info-panel.liquid
