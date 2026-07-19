@@ -271,11 +271,7 @@ Furthermore We see snippet file is rendered in section, and CSS in assets are lo
 We see block instance `info_panel_bUdBqX` is placed. Now we can see edited theme in local preview  same as online editor. 
 
 <div class="mermaid">
-    ---
-        config:
-            class:
-                hideEmptyMembersBox: true
-    ---
+    %%{init: {"class": {"hideEmptyMembersBox": true}}}%%
     classDiagram    
     theme --> preview : shopify theme dev
     theme --> online : shopify theme push
